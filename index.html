@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Soil Suitability Analysis</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f4f4f4;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-top: 15px;
+        }
+        select, input[type=number] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 15px;
+            background-color: #28a745;
+            border: none;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #result {
+            margin-top: 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .suitable {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .unsuitable {
+            color: #721c24;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <h1>Soil Suitability Analysis</h1>
+    <p>Enter soil properties to check suitability for general crop cultivation.</p>
+
+    <label for="soilPh">Soil pH (4.0 - 9.0):</label>
+    <input type="number" id="soilPh" min="4" max="9" step="0.1" value="6.5" />
+
+    <label for="soilType">Soil Type:</label>
+    <select id="soilType">
+        <option value="sandy">Sandy</option>
+        <option value="loamy" selected>Loamy</option>
+        <option value="clayey">Clayey</option>
+        <option value="peaty">Peaty</option>
+        <option value="chalky">Chalky</option>
+        <option value="silty">Silty</option>
+    </select>
+
+    <label for="moisture">Moisture Level (%):</label>
+    <input type="number" id="moisture" min="0" max="100" value="30" />
+
+    <button onclick="analyzeSoil()">Check Suitability</button>
+
+    <div id="result"></div>
+
+    <script>
+        function analyzeSoil() {
+            const ph = parseFloat(document.getElementById('soilPh').value);
+            const soilType = document.getElementById('soilType').value;
+            const moisture = parseFloat(document.getElementById('moisture').value);
+            const resultDiv = document.getElementById('result');
+
+            // Basic validation
+            if (isNaN(ph) || ph < 4 || ph > 9) {
+                resultDiv.textContent = 'Please enter a valid soil pH between 4.0 and 9.0.';
+                resultDiv.className = 'unsuitable';
+                return;
+            }
+            if (isNaN(moisture) || moisture < 0 || moisture > 100) {
+                resultDiv.textContent = 'Please enter a valid moisture level between 0 and 100%.';
+                resultDiv.className = 'unsuitable';
+                return;
+            }
+
+            // Simple suitability rules:
+            // Ideal pH for most crops: 6.0 - 7.5
+            // Ideal moisture: 20% - 60%
+            // Soil type preference: Loamy > Silty > Sandy > Clayey > Peaty > Chalky
+
+            let suitabilityScore = 0;
+
+            // pH scoring
+            if (ph >= 6.0 && ph <= 7.5) {
+                suitabilityScore += 3;
+            } else if (ph >= 5.5 && ph < 6.0 || ph > 7.5 && ph <= 8.0) {
+                suitabilityScore += 2;
+            } else {
+                suitabilityScore += 1;
+            }
+
+            // Moisture scoring
+            if (moisture >= 20 && moisture <= 60) {
+                suitabilityScore += 3;
+            } else if (moisture >= 15 && moisture < 20 || moisture > 60 && moisture <= 70) {
+                suitabilityScore += 2;
+            } else {
+                suitabilityScore += 1;
+            }
+
+            // Soil type scoring
+            const soilPreference = {
+                'loamy': 3,
+                'silty': 2,
+                'sandy': 2,
+                'clayey': 1,
+                'peaty': 1,
+                'chalky': 0
+            };
+
+            suitabilityScore += soilPreference[soilType] || 0;
+
+            // Total max score = 3 + 3 + 3 = 9
+
+            let message = '';
+            if (suitabilityScore >= 7) {
+                message = 'Highly Suitable for crop cultivation.';
+                resultDiv.className = 'suitable';
+            } else if (suitabilityScore >= 5) {
+                message = 'Moderately Suitable. Some amendments may be needed.';
+                resultDiv.className = 'suitable';
+            } else {
+                message = 'Unsuitable soil conditions for most crops.';
+                resultDiv.className = 'unsuitable';
+            }
+
+            resultDiv.textContent = message;
+        }
+    </script>
+</body>
+</html>
